@@ -13,7 +13,7 @@ class VoiceInterfacePage extends StatefulWidget{
 }
 
 class _VoiceInterfacePageState extends State<VoiceInterfacePage>{
-  final String yourApiKey = 'AIzaSyDKBKvr5rbMlYWdrwuP4NFmLHEFMnsq3PE';
+  final String yourApiKey = '----';
   final rememberFuntions = Rememberfuntions();
   String textToShow = '';
   final SpeechToText _speechToText = SpeechToText();
