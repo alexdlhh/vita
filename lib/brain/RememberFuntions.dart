@@ -6,7 +6,7 @@ import 'package:vita_seniors/components/Lang.dart';
 class Rememberfuntions{
   final geminiModel = GenerativeModel(
       model: 'gemini-1.5-flash-latest',
-      apiKey: 'AIzaSyDKBKvr5rbMlYWdrwuP4NFmLHEFMnsq3PE',
+      apiKey: '-----',
   );
   FlutterTts flutterTts = FlutterTts();
   final LangStrings langStrings = LangStrings();
