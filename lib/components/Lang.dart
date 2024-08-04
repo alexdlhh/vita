@@ -1,4 +1,4 @@
-class LangStrings{
+class LangStrings {
   static const voiceInterface = {
     'es-ES': 'Interfaz de voz',
     'en-US': 'Voice Interface',
@@ -112,19 +112,86 @@ class LangStrings{
     'en-US': 'I can hear you',
   };
   static const hellowPrompt = {
-    'es-ES': 'Eres VITA, un asistente para personas mayores, tu objetivo es mantenerlos entretenidos, iniciar conversaciones con ellos, proponerles jugar a juegos en la pantalla del teléfono, ver vídeos, escuchar música, recordarles que tomen su medicación, también tendrás algunos datos sobre su ritmo cardíaco por lo que podrías proponerles dar un paseo si pueden caminar. no utilices emoticonos. escribe de forma que el texto pueda ser procesado de forma hablada.\Nsi el usuario acaba de abrir la aplicación por primera vez, escribe un texto para presentarte y pedirle datos relevantes para ayudarle como su nombre, sexo, capacidad de caminar, edad y fecha de nacimiento.',
-    'en-US': 'You are VITA, an assistant for elderly people, your goal is to keep them entertained, start conversations with them, propose to play games on the phone screen, watch videos, listen to music, remind them to take their medication, you will also have some data about their heartbeat so you could propose to take them for a walk if they can walk. do not use emoticons. write in a way that the text can be processed in a spoken form.\n\nif the user has just opened the application for the first time, write a text to introduce yourself and ask relevant data to help them such as their name, gender, walking ability, age and birthdate.'
+    'es-ES':
+        'Eres VITA, un asistente para personas mayores, tu objetivo es mantenerlos entretenidos, iniciar conversaciones con ellos, proponerles jugar a juegos en la pantalla del teléfono, ver vídeos, escuchar música, recordarles que tomen su medicación, también tendrás algunos datos sobre su ritmo cardíaco por lo que podrías proponerles dar un paseo si pueden caminar. no utilices emoticonos. escribe de forma que el texto pueda ser procesado de forma hablada.\Nsi el usuario acaba de abrir la aplicación por primera vez, escribe un texto para presentarte y pedirle datos relevantes para ayudarle como su nombre, sexo, capacidad de caminar, edad y fecha de nacimiento.',
+    'en-US':
+        'You are VITA, an assistant for elderly people, your goal is to keep them entertained, start conversations with them, propose to play games on the phone screen, watch videos, listen to music, remind them to take their medication, you will also have some data about their heartbeat so you could propose to take them for a walk if they can walk. do not use emoticons. write in a way that the text can be processed in a spoken form.\n\nif the user has just opened the application for the first time, write a text to introduce yourself and ask relevant data to help them such as their name, gender, walking ability, age and birthdate.'
   };
   static const userSaid0 = {
-    'es-ES': 'Eres VITA, un asistente para personas mayores, ya te has presentado y el usuario te ha dicho:',
-    'en-US': 'You are VITA, an assistant for elderly people, you have already introduced yourself and the user has said:'
+    'es-ES':
+        'Eres VITA, un asistente para personas mayores, ya te has presentado y el usuario te ha dicho:',
+    'en-US':
+        'You are VITA, an assistant for elderly people, you have already introduced yourself and the user has said:'
   };
   static const userSaid1 = {
-    'es-ES': 'con esta información tienes que hacer una frase personalizada para el usuario y proponerle hablar sobre algún tema, responde en español',
-    'en-US': 'with this information you have to make a personalized sentence for the user and propose to talk about some topic, respond in english'
+    'es-ES':
+        'con esta información tienes que hacer una frase personalizada para el usuario y proponerle hablar sobre algún tema, responde en español',
+    'en-US':
+        'with this information you have to make a personalized sentence for the user and propose to talk about some topic, respond in english'
   };
   static const userSaid2 = {
     'es-ES': 'responde al usuario lo mejor que puedas, responde en español',
     'en-US': 'respond to the user as best you can, respond in english'
+  };
+  static const rememberAdded = {
+    'es-ES': 'Recordatorio añadido',
+    'en-US': 'Remember added',
+  };
+  static const informUserOf = {
+    'es-ES': 'Informa al usuario de ',
+    'en-US': 'Inform the user of '
+  };
+  static const readRememberList = {
+    'es-ES':
+        'voy a darte un JSON con los recordatorios guardados del usuario, necesito que informes al usuario de que recordatorios hay apuntados',
+    'en-US':
+        'I will give you a JSON with the saved reminders of the user, I need to inform the user that there are reminders saved'
+  };
+  static const readToShopList = {
+    'es-ES':
+        'voy a darte un JSON con la lista de compras guardada del usuario, necesito que informes al usuario de que compras hay apuntadas',
+    'en-US':
+        'I will give you a JSON with the saved to-do list of the user, I need to inform the user that there are items saved'
+  };
+  static const toShopAdded = {
+    'es-ES': 'Producto añadido',
+    'en-US': 'Item added',
+  };
+  static const toShopDeleted = {
+    'es-ES': 'Lista de compras borrada',
+    'en-US': 'To-do list deleted',
+  };
+  static const volumeUp = {
+    'es-ES': 'Volumen aumentado',
+    'en-US': 'Volume increased',
+  };
+  static const volumeDown = {
+    'es-ES': 'Volumen reducido',
+    'en-US': 'Volume reduced',
+  };
+
+  static const ThereIsWhatIHaveFound = {
+    'es-ES': 'Lo que he encontrado es ',
+    'en-US': 'There is what I have found '
+  };
+
+  static const callSuccess = {
+    'es-ES': 'Llamada realizada con éxito',
+    'en-US': 'Call successfully made',
+  };
+  
+  static const callFailed = {
+    'es-ES': 'No se pudo realizar la llamada',
+    'en-US': 'Call failed',
+  };
+
+  static const emailSuccess = {
+    'es-ES': 'Correo electrónico enviado con éxito',
+    'en-US': 'Email successfully sent',
+  };
+
+  static const emailFailed = {
+    'es-ES': 'No se pudo enviar el correo electrónico',
+    'en-US': 'Email failed to send',
   };
 }

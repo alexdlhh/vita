@@ -16,9 +16,18 @@ dependencies:
   cupertino_icons: ^1.0.6
   shared_preferences: ^2.2.3
   flutter_tts: ^4.0.2
+  googleapis_auth: ^1.6.0
+  googleapis: ^13.1.0
+  url_launcher: ^6.3.0
   google_generative_ai: ^0.4.3
   speech_to_text: ^6.6.1
   avatar_glow: ^2.0.2
+  volume_controller: ^2.0.7
+  webview_flutter: ^4.8.0
+  http: ^1.2.1
+  flutter_dotenv: ^5.1.0
+  path_provider: ^2.1.3
+  flutter_contacts: ^1.1.8
 
 dev_dependencies:
   flutter_test:
@@ -32,7 +41,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - .env
     - assets/images/logo.png
+    - assets/memory/memory.json
+    - assets/memory/rememberList.json
+    - assets/memory/shopList.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -10,15 +10,15 @@ This Flutter application aims to combat loneliness in seniors through interactio
 ## Features:
 - Social Interaction: Allows users to interact with the AI to combat social isolation.
 - Reminders and Alarms: Helps users remember appointments, medications, and other important tasks.
-- Activity Monitoring: Detects inactivity and sends suggestions to stay active, such as walking or engaging in physical activities.
 - Personalized Recommendations: Based on user information, the application offers personalized recommendations, such as places to visit, activities to do, or helpful resources.
 - Voice Calls: Facilitates communication with family and friends through simple voice calls.
-- Wearable Support: Integrates wearable data to provide personalized recommendations and alerts, such as heart rate monitoring or stress levels.
 
 ## Technologies used:
 - Flutter
 - Firebase
 - Google Cloud AI
+- Youtube API
+- Google Calendar
 
 ## Requirements:
 - Mobile device with Android or iOS

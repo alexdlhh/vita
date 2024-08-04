@@ -1,194 +1,161 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:google_generative_ai/google_generative_ai.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:vita_seniors/components/Lang.dart';
+import 'package:vita_seniors/brain/MemoryFunctions.dart';
+import 'package:vita_seniors/brain/GeminiFunctions.dart';
+import "package:googleapis_auth/auth_io.dart";
+import 'package:googleapis/calendar/v3.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
 
-class Rememberfuntions{
-  final geminiModel = GenerativeModel(
-      model: 'gemini-1.5-flash-latest',
-      apiKey: '-----',
-  );
-  FlutterTts flutterTts = FlutterTts();
+class Rememberfuntions {
   final LangStrings langStrings = LangStrings();
   String lang = 'es-ES';
-
-  Future<Map<String, List<String>>> loadUserInformation() async{
-    final prefs = await SharedPreferences.getInstance();
-    final name = prefs.getString("name");
-    final sex = prefs.getString('sex');
-    final age = prefs.getString('age');
-    final birthDate = prefs.getString('birthDate');
-    final height = prefs.getString('height');
-    final weight = prefs.getString('weight');
-    final bloodType = prefs.getString('bloodType');
-    final allergies = prefs.getString('allergies');
-    final medications = prefs.getString('medications');
-    final notes = prefs.getString('notes');
-    final canWalk = prefs.getString('canWalk');
-    final canRun = prefs.getString('canRun');
-    final canSwim = prefs.getString('canSwim');
-    final useWalkingSteak = prefs.getString('useWalingSteak');
-
-    List<String> thingsToAsk = [];
-    List<String> UserData = [];
-    Map<String, List<String>> returnData = {
-      'userData' : UserData,
-      'thingsToAsk' : thingsToAsk
-    };
-    if(name == null || name.isEmpty){
-      thingsToAsk.add('name');
-    }else{
-      UserData.add(name);
-    }
-    if(sex==null || sex.isEmpty){
-      thingsToAsk.add('sex');
-    }else{
-      UserData.add(sex);
-    }
-    if(age == null || age.isEmpty){
-      thingsToAsk.add('age');
-    }else{
-      UserData.add(age);
-    }
-    if(birthDate == null || birthDate.isEmpty){
-      thingsToAsk.add('birthDate');
-    }else{
-      UserData.add(birthDate);
-    }
-    if(height == null || height.isEmpty){
-      thingsToAsk.add('height');
-    }else{
-      UserData.add(height);
-    }
-    if(weight == null || weight.isEmpty){
-      thingsToAsk.add('weight');
-    }else{
-      UserData.add(weight);
-    }
-    if(bloodType == null || bloodType.isEmpty){
-      thingsToAsk.add('bloodType');
-    }else{
-      UserData.add(bloodType);
-    }
-    if(allergies == null || allergies.isEmpty){
-      thingsToAsk.add('allergies');
-    }else{
-      UserData.add(allergies);
-    }
-    if(medications == null || medications.isEmpty){
-      thingsToAsk.add('medications');
-    }else{
-      UserData.add(medications);
-    }
-    if(notes == null || notes.isEmpty){
-      thingsToAsk.add('notes');
-    }else{
-      UserData.add(notes);
-    }
-    if(canWalk == null || canWalk.isEmpty){
-      thingsToAsk.add('canWalk');
-    }else{
-      UserData.add(canWalk);
-    }
-    if(canRun == null || canRun.isEmpty){
-      thingsToAsk.add('canRun');
-    }else{
-      UserData.add(canRun);
-    }
-    if(canSwim == null || canSwim.isEmpty){
-      thingsToAsk.add('canSwim');
-    }else{
-      UserData.add(canSwim);
-    }
-    if(useWalkingSteak == null || useWalkingSteak.isEmpty){
-      thingsToAsk.add('useWalkingSteak');
-    }else{
-      UserData.add(useWalkingSteak);
-    }
-    if(name == null){
-      returnData['toAsk'] = [''];
-    }
-    returnData['userData'] = UserData;
-    returnData['thingsToAsk'] = thingsToAsk;
-    return returnData;    
-  }
-
-  Future<void> configureTts() async {
-    String ln = await getLanguage();
-    lang = ln;
-    await flutterTts.setLanguage(lang);
-    await flutterTts.setSpeechRate(1.1);
-    await flutterTts.setVolume(1.0);
-  }
-
-  Future<FlutterTts> speakText(String text) async {
-    await flutterTts.speak(text);
-    return flutterTts;
-  }
+  final memory = MemoryFunctions();
+  final gemini = Geminifuntions();
+  static final List<String> _scopes = [CalendarApi.calendarScope];
+  final _credentials =
+      new ClientId(dotenv.env['GOOGLE_OAUTH_KEY'] ?? 'NO API KEY', "");
 
   Future<bool> setLanguage(String language) async {
     final prefs = await SharedPreferences.getInstance();
-    try{
+    try {
       await prefs.setString("language", language);
-    }catch(e){
+    } catch (e) {
       return false;
     }
     return true;
   }
 
-  Future<String> getLanguage() async{
+  Future<String> getLanguage() async {
     String language = 'en-US';
     final prefs = await SharedPreferences.getInstance();
-    try{
+    try {
       language = prefs.getString("language") ?? 'en-US';
-    }catch(e){
+    } catch (e) {
       return 'en-US';
     }
     return language;
   }
 
-  void stopSpeaking() async {
-    await flutterTts.stop();
+  Future<void> setToRememberList(Map<String, dynamic> data) async {
+    //primero leemos la lista de recordatorios
+    String rememberList = await memory.readFile('rememberList');
+    if (rememberList == '') {
+      rememberList = '{"rememberList":[]}';
+    }
+    Map<String, dynamic> rememberListDefined = json.decode(rememberList);
+    rememberListDefined =
+        await cleanRememberListOldRemembers(rememberListDefined);
+    //por seguridad comprobamos si los campos date, hour, description existen en data
+    if (data.containsKey('date')) {
+      String today = DateTime.now().toString().split(' ')[0];
+      if (data['date'] == 'hoy' || data['date'] == 'today') {
+        data['date'] = today;
+      }
+    }
+    if (data.containsKey('hour')) {
+      if (data['hour'] == 'now') {
+        data['hour'] = DateTime.now().toString().split(' ')[1];
+      }
+    }
+    if (data.containsKey('description')) {
+      if (data['description'] == 'none') {
+        data['description'] = '';
+      }
+    }
+    createEvent(data);
+    //añadimos el recordatorio a la lista
+    rememberListDefined['rememberList'].add(data);
+    //convertimos rememberListDefined a JSON para su guardado
+    String rememberListJSON = json.encode(rememberListDefined);
+    //guardamos el JSON en el archivo rememberList
+    await memory.modifyFile('rememberList', rememberListJSON);
   }
 
-  Future<String> preparetToAsk() async{
-    String result = '';
-    try {
-      lang = await getLanguage();
-      final content = [Content.text(LangStrings.hellowPrompt[lang]??'')];
-      final response = await geminiModel.generateContent(content);
-      result = response.text ?? '';
-    } catch (e) {
-      print("Error is $e");
-    }
-    return result;
+  Future<String> getRememberList() async {
+    String rememberList = await memory.readFile('rememberList');
+    return rememberList;
   }
 
-  Future<String> userFirstInteraction(String userSpeak) async{
-    String result = '';
-    try {
-      lang = await getLanguage();
-      final content = [Content.text('${LangStrings.userSaid0[lang]??''} $userSpeak ${LangStrings.userSaid1[lang]??''}')];
-      final response = await geminiModel.generateContent(content);
-
-      result = response.text ?? 'no texto de gemini';
-    } catch (e) {
-      print("Error is $e");
+  Future<Map<String, dynamic>> cleanRememberListOldRemembers(
+      Map<String, dynamic> RememberList) async {
+    DateTime today = DateTime.now();
+    for (int i = 0; i < RememberList['rememberList'].length; i++) {
+      DateTime date = DateTime.parse(RememberList['rememberList'][i]['date']);
+      if (date.isBefore(today)) {
+        RememberList['rememberList'].removeAt(i);
+      }
     }
-    return result;
+
+    String rememberListJSON = json.encode(RememberList);
+    await memory.modifyFile('rememberList', rememberListJSON);
+
+    return RememberList;
   }
 
-  Future<String> userPrompt(String userSpeak) async{
-    String result = '';
-    try {
-      lang = await getLanguage();
-      final content = [Content.text('${LangStrings.userSaid0[lang]??''} $userSpeak ${LangStrings.userSaid2[lang]??''}')];
-      final response = await geminiModel.generateContent(content);
-
-      result = response.text ?? 'no texto de gemini';
-    } catch (e) {
-      print("Error is $e");
+  Future<void> setToShopList(Map<String, dynamic> data) async {
+    //primero leemos la lista de compras
+    String shopList = await memory.readFile('shopList');
+    Map<String, dynamic> shopListDefined = json.decode(shopList);
+    //por seguridad comprobamos si los campos item y quantity existen
+    if (data.containsKey('item') && data.containsKey('quantity')) {
+      shopListDefined['shopList'].add(data);
     }
-    return result;
+    //convertimos shopListDefined a JSON para su guardado
+    String shopListJSON = json.encode(shopListDefined);
+    //guardamos el JSON en el archivo shopList
+    await memory.modifyFile('shopList', shopListJSON);
+  }
+
+  Future<String> getShopList() async {
+    String shopList = await memory.readFile('shopList');
+    return shopList;
+  }
+
+  Future<void> cleanToShopListOldItems() async {
+    memory.modifyFile('shopList', '{"shopList":[]}');
+  }
+
+  Future<void> setMemoryForIA(String user, String assistant) async {
+    String memoryTxt = await memory.readFile('memory');
+    Map<String, dynamic> memoryDefined = json.decode(memoryTxt);
+    memoryDefined['user'] = user;
+    memoryDefined['assistant'] = assistant;
+    String memoryJSON = json.encode(memoryDefined);
+    String ResumeJSON = await gemini.memoriesResume(memoryJSON);
+    await memory.modifyFile('memory', ResumeJSON);
+  }
+
+  Future<String> getMemoryForIA() async {
+    String memoryTxt = await memory.readFile('memory');
+    return memoryTxt;
+  }
+
+  Future<void> createEvent(Map<String, dynamic> rememberList) async {
+    final authClient =
+        await clientViaUserConsent(_credentials, _scopes, prompt);
+    final calendar = CalendarApi(authClient);
+
+    //creamos evento en Google Calendar a partir de rememberList
+    final event = Event();
+    event.summary = rememberList['description'];
+    event.start = EventDateTime(
+        dateTime:
+            DateTime.parse(rememberList['date'] + ' ' + rememberList['hour']));
+    event.end = EventDateTime(
+        dateTime:
+            DateTime.parse(rememberList['date'] + ' ' + rememberList['hour']));
+
+    await calendar.events.insert(event, "primary");
+  }
+
+  void prompt(String url) async {
+    Uri urlPaser = Uri.parse(url);
+    if (await canLaunchUrl(urlPaser)) {
+      await launchUrl(urlPaser);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
