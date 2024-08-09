@@ -80,24 +80,6 @@ class _RememberPageState extends State<RememberPage> {
                         ],
                       ),
                     ),
-                    PopupMenuItem(
-                      value: LangStrings.settings[lang] ?? '',
-                      onTap: () {
-                        //abrimos settingPage()
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    const JsonEditorView(routeName: 'memory')));
-                      },
-                      child: Row(
-                        children: [
-                          const Icon(Icons.settings),
-                          const SizedBox(width: 8),
-                          Text(LangStrings.settings[lang] ?? ''),
-                        ],
-                      ),
-                    ),
                   ]),
         ],
       ),
