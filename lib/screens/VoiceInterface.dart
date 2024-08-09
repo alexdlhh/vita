@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vita_seniors/brain/GeminiFunctions.dart';
 import 'package:vita_seniors/brain/RememberFuntions.dart';
 import 'package:vita_seniors/brain/SpeakFunctions.dart';
 import 'package:vita_seniors/brain/DeciderFunctions.dart';
@@ -20,6 +21,7 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
   final rememberFuntions = Rememberfuntions();
   final speakFunctions = Speakfuntions();
   final deciderFunctions = DeciderFunctions();
+  final geminifuntions = Geminifuntions();
   String textToShow = '';
   final SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
@@ -114,41 +116,6 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
                       backgroundImage: AssetImage(vitaImage),
                     ),
                   ),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.56,
-                        child: TextFormField(
-                          decoration: InputDecoration(
-                            labelText: LangStrings.typeAnithing[lang] ?? '',
-                            labelStyle: const TextStyle(color: Colors.white),
-                            enabledBorder: const UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                            focusedBorder: const UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Por favor, ingrese su nombre';
-                            }
-                            return null;
-                          },
-                          style: const TextStyle(color: Colors.white),
-                          onChanged: (value) {
-                            _lastWords = value;
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.3,
-                        child: ElevatedButton(
-                            onPressed: fake,
-                            child: Text(LangStrings.preguntar[lang] ?? '')),
-                      )
-                    ],
-                  ),
                   Center(
                       child: Text(
                     _speechToText.isListening
@@ -217,7 +184,15 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
   void _initSpeech() async {
     _speechEnabled = await _speechToText.initialize();
     //aqui comprobaremos si el usuario ha interaccionado ya, en caso de no haberlo hecho nos presentaremos
-    //_startListening();
+    if (await rememberFuntions.checkUserFirstInteraction()) {
+      await rememberFuntions.setFirstInteraction();
+      textToShow = await geminifuntions.userFirstInteraction(lang);
+      await speakFunctions.speakText(textToShow);
+      setState(() {
+        userFisrtInteraction = true;
+      });
+    }
+    _startListening();
   }
 
   void _startListening() async {
@@ -291,11 +266,19 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
       'para',
       'stop',
       'lisen',
-      'escocha',
-      'si pero',
-      'yes but',
+      'escucha',
+      'pero',
+      'but',
       'perdona',
-      'sorry but'
+      'sorry',
+      'no',
+      'yes',
+      'detente',
+      'calla',
+      'wait',
+      'espera',
+      'second',
+      'momento'
     ];
     //a partir de textToShow separamos todo por un espacio y comparamos parabra a palabra con _lastWords si alguna es diferente y ademas aparece en stopstring
     List<String> waitedWords = textToShow.split(' ');
@@ -306,37 +289,5 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
         _startListening();
       }
     }
-  }
-
-  void fake() async {
-    await _speechToText.stop();
-
-    if (_lastWords != '') {
-      Map<String, dynamic> response =
-          await deciderFunctions.analizer(_lastWords);
-      if (response["run"] == "gemini") {
-        textToShow = response["response"];
-        speakFunctions.speakText(response["response"]);
-      }
-      if (response["run"] == "youtube") {
-        setState(() {
-          textToShow = LangStrings.thereIsWhatIHaveFound[lang] ?? '';
-          url = 'https://www.youtube.com/watch?v=${response["response"]}';
-          playVideo = true;
-        });
-      }
-      if (response['run'] == 'music') {
-        setState(() {
-          textToShow = LangStrings.thereIsWhatIHaveFound[lang] ?? '';
-          url = 'https://music.youtube.com/watch?v=${response["response"]}';
-          playVideo = true;
-        });
-      }
-    }
-    setState(() {
-      _lastWords = '';
-      listen = false;
-      textToShow = textToShow;
-    });
   }
 }

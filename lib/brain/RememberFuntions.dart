@@ -157,4 +157,19 @@ class Rememberfuntions {
       throw 'Could not launch $url';
     }
   }
+
+  Future<bool> checkUserFirstInteraction() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool userFirstInteraction = prefs.getBool('userFirstInteraction') ?? false;
+    if (!userFirstInteraction) {
+      await prefs.setBool('userFirstInteraction', true);
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> setFirstInteraction() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('userFirstInteraction', true);
+  }
 }

@@ -11,28 +11,12 @@ class Geminifuntions {
   final LangStrings langStrings = LangStrings();
   String lang = 'es-ES';
 
-  Future<String> preparetToAsk(String lang) async {
+  Future<String> userFirstInteraction(String lang) async {
     String result = '';
     try {
-      final content = [Content.text(LangStrings.hellowPrompt[lang] ?? '')];
+      final content = [Content.text(LangStrings.hellowPrompt[lang]??'')];
       final response = await geminiModel.generateContent(content);
       result = response.text ?? '';
-    } catch (e) {
-      //print("Error is $e");
-    }
-    return result;
-  }
-
-  Future<String> userFirstInteraction(String userSpeak, String lang) async {
-    String result = '';
-    try {
-      final content = [
-        Content.text(
-            '${LangStrings.userSaid0[lang] ?? ''} $userSpeak ${LangStrings.userSaid1[lang] ?? ''}')
-      ];
-      final response = await geminiModel.generateContent(content);
-
-      result = response.text ?? 'no texto de gemini';
     } catch (e) {
       //print("Error is $e");
     }
