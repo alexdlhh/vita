@@ -4,7 +4,7 @@ import 'package:vita_seniors/brain/MemoryFunctions.dart';
 import 'package:vita_seniors/brain/GeminiFunctions.dart';
 import "package:googleapis_auth/auth_io.dart";
 import 'package:googleapis/calendar/v3.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:vita_seniors/components/Key.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 
@@ -14,8 +14,7 @@ class Rememberfuntions {
   final memory = MemoryFunctions();
   final gemini = Geminifuntions();
   static final List<String> _scopes = [CalendarApi.calendarScope];
-  final _credentials =
-      new ClientId(dotenv.env['GOOGLE_OAUTH_KEY'] ?? 'NO API KEY', "");
+  final _credentials = ClientId(KeyStorageCustom.GOOGLE_OAUTH_KEY, "");
 
   Future<bool> setLanguage(String language) async {
     final prefs = await SharedPreferences.getInstance();
@@ -79,19 +78,19 @@ class Rememberfuntions {
   }
 
   Future<Map<String, dynamic>> cleanRememberListOldRemembers(
-      Map<String, dynamic> RememberList) async {
+      Map<String, dynamic> rememberList) async {
     DateTime today = DateTime.now();
-    for (int i = 0; i < RememberList['rememberList'].length; i++) {
-      DateTime date = DateTime.parse(RememberList['rememberList'][i]['date']);
+    for (int i = 0; i < rememberList['rememberList'].length; i++) {
+      DateTime date = DateTime.parse(rememberList['rememberList'][i]['date']);
       if (date.isBefore(today)) {
-        RememberList['rememberList'].removeAt(i);
+        rememberList['rememberList'].removeAt(i);
       }
     }
 
-    String rememberListJSON = json.encode(RememberList);
+    String rememberListJSON = json.encode(rememberList);
     await memory.modifyFile('rememberList', rememberListJSON);
 
-    return RememberList;
+    return rememberList;
   }
 
   Future<void> setToShopList(Map<String, dynamic> data) async {
@@ -123,8 +122,8 @@ class Rememberfuntions {
     memoryDefined['user'] = user;
     memoryDefined['assistant'] = assistant;
     String memoryJSON = json.encode(memoryDefined);
-    String ResumeJSON = await gemini.memoriesResume(memoryJSON);
-    await memory.modifyFile('memory', ResumeJSON);
+    String resumeJSON = await gemini.memoriesResume(memoryJSON);
+    await memory.modifyFile('memory', resumeJSON);
   }
 
   Future<String> getMemoryForIA() async {

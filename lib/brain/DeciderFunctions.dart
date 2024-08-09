@@ -317,7 +317,7 @@ class DeciderFunctions {
 
         petición real:
       """;
-    } else if (lang == 'en-EN') {
+    } else if (lang == 'en-US') {
       return """
         Hi Gemini, I will provide you with some examples that respond to a specific action. This action will have a key, then I will give you what the user has requested and you should respond with the key that best responds and a JSON where you structure the request. Respond with that and do not give explanations as your response will be saved in a JSON to make another interaction with you in the future adding this information.
         Today is $today so you can take it into account.
@@ -437,7 +437,7 @@ class DeciderFunctions {
         En base a esa lista elige que usuario es el más probable para la petición del usuario, responde solo con la posición en la lista de usuarios.      
         $userRequest
       """;
-    } else if (lang == 'en-EN') {
+    } else if (lang == 'en-US') {
       return """
         Hi Gemini, a user has asked to call a person and the app has found these users:
         ${list.join('\n')}
@@ -449,7 +449,7 @@ class DeciderFunctions {
     return '';
   }
 
-  String emailSelectPrompt(String, List<String> list, String userRequest){
+  String emailSelectPrompt(String lang, List<String> list, String userRequest) {
     if (lang == 'es-ES') {
       return """
         Hola Gemini, un usuario ha pedido enviar un correo a una persona y la app ha encontrado a estos usuarios:
@@ -458,7 +458,7 @@ class DeciderFunctions {
         En base a esa lista elige que usuario es el más probable para la petición del usuario, responde solo con la posición en la lista de usuarios.      
         $userRequest
       """;
-    } else if (lang == 'en-EN') {
+    } else if (lang == 'en-US') {
       return """
         Hi Gemini, a user has asked to send a email to a person and the app has found these users:
         ${list.join('\n')}

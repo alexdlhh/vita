@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:vita_seniors/components/Lang.dart';
-import 'package:vita_seniors/screens/Editor.dart';
+import 'dart:convert';
+import 'package:json_editor_flutter/json_editor_flutter.dart';
+import 'package:vita_seniors/brain/MemoryFunctions.dart';
 import 'package:vita_seniors/brain/RememberFuntions.dart';
 import 'package:vita_seniors/screens/VoiceInterface.dart';
 import 'package:vita_seniors/screens/Settings.dart';
+import 'package:vita_seniors/components/Lang.dart';
 
-class RememberPage extends StatefulWidget {
-  const RememberPage({super.key});
+class JsonEditorView extends StatefulWidget {
+  final String routeName;
+  const JsonEditorView({super.key, required this.routeName});
 
   @override
-  State<RememberPage> createState() => _RememberPageState();
+  JsonEditorViewState createState() => JsonEditorViewState();
 }
 
-class _RememberPageState extends State<RememberPage> {
+class JsonEditorViewState extends State<JsonEditorView> {
+  Map<String, dynamic> _data = {};
+  String jsonString = '{}';
+  final TextEditingController _controller = TextEditingController();
+  final MemoryFunctions memoryFunctions = MemoryFunctions();
   final rememberFuntions = Rememberfuntions();
   final LangStrings langStrings = LangStrings();
   String lang = 'en-US';
@@ -20,6 +27,7 @@ class _RememberPageState extends State<RememberPage> {
   @override
   void initState() {
     super.initState();
+    _loadData();
     init();
   }
 
@@ -32,7 +40,22 @@ class _RememberPageState extends State<RememberPage> {
     }
   }
 
-  @override
+  Future<void> _loadData() async {
+    String jsonString = await memoryFunctions.readFile(widget.routeName);
+    setState(() {
+      jsonString = jsonString;
+      _data = jsonDecode(jsonString);
+      _controller.text = jsonEncode(_data);
+    });
+  }
+
+  void _saveChanges(Map<String, dynamic> value) {
+    memoryFunctions.modifyFile(widget.routeName, jsonEncode(value));
+    setState(() {
+      _data = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -101,67 +124,11 @@ class _RememberPageState extends State<RememberPage> {
                   ]),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ListTile(
-                  leading: const Icon(Icons.list),
-                  title: Text(LangStrings.rememberList[lang] ?? ''),
-                  onTap: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const JsonEditorView(
-                                routeName: 'rememberList')));
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ListTile(
-                  leading: const Icon(Icons.shopping_cart),
-                  title: Text(LangStrings.shopList[lang] ?? ''),
-                  onTap: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const JsonEditorView(routeName: 'shopList')));
-                  },
-                ),
-              ),
-              const SizedBox(height: 16),
-              Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: ListTile(
-                  leading: const Icon(Icons.memory),
-                  title: Text(LangStrings.memory[lang] ?? ''),
-                  onTap: () {
-                    Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                const JsonEditorView(routeName: 'memory')));
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
+      body: JsonEditor(
+        onChanged: (value) {
+          _saveChanges(value);
+        },
+        json: jsonEncode(_data),
       ),
     );
   }

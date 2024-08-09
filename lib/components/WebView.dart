@@ -26,7 +26,7 @@ class _WebViewBoxState extends State<WebViewBox> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: widget.width,
       height: widget.height,
       child: WebViewWidget(controller: controller),

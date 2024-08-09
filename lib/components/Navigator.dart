@@ -1,25 +1,23 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:vita_seniors/components/Key.dart';
 
 class Navigator {
-  static const GoogleSearchUrl = 'https://www.google.com/search?q=';
+  static const googleSearchUrl = 'https://www.google.com/search?q=';
 
   Future<String> searchOnGoogle(String search) async {
-    final response = await http.get(Uri.parse(GoogleSearchUrl + search));
+    final response = await http.get(Uri.parse(googleSearchUrl + search));
     return response.body;
   }
 
   Future<String> searchOnYoutube(String search) async {
-    String youtubeApiKey = dotenv.env['YOUTUBE_API_KEY'] ?? 'NO API KEY';
-
     //tratamos search para que no rompa la url
     search = search.replaceAll(' ', '+');
 
     var request = http.Request(
         'GET',
         Uri.parse(
-            'https://www.googleapis.com/youtube/v3/search?q=$search&maxResults=1&key=$youtubeApiKey'));
+            'https://www.googleapis.com/youtube/v3/search?q=$search&maxResults=1&key=${KeyStorageCustom.YOUTUBE_API_KEY}'));
 
     http.StreamedResponse response = await request.send();
 
@@ -32,10 +30,8 @@ class Navigator {
       }
       return results[0];
     } else {
-      print(response.reasonPhrase);
-      return '';
+      //print(response.reasonPhrase);
+      return response.reasonPhrase ?? '';
     }
   }
-
-  
 }

@@ -113,7 +113,7 @@ class LangStrings {
   };
   static const hellowPrompt = {
     'es-ES':
-        'Eres VITA, un asistente para personas mayores, tu objetivo es mantenerlos entretenidos, iniciar conversaciones con ellos, proponerles jugar a juegos en la pantalla del teléfono, ver vídeos, escuchar música, recordarles que tomen su medicación, también tendrás algunos datos sobre su ritmo cardíaco por lo que podrías proponerles dar un paseo si pueden caminar. no utilices emoticonos. escribe de forma que el texto pueda ser procesado de forma hablada.\Nsi el usuario acaba de abrir la aplicación por primera vez, escribe un texto para presentarte y pedirle datos relevantes para ayudarle como su nombre, sexo, capacidad de caminar, edad y fecha de nacimiento.',
+        'Eres VITA, un asistente para personas mayores, tu objetivo es mantenerlos entretenidos, iniciar conversaciones con ellos, proponerles jugar a juegos en la pantalla del teléfono, ver vídeos, escuchar música, recordarles que tomen su medicación, también tendrás algunos datos sobre su ritmo cardíaco por lo que podrías proponerles dar un paseo si pueden caminar. no utilices emoticonos. escribe de forma que el texto pueda ser procesado de forma hablada.Nsi el usuario acaba de abrir la aplicación por primera vez, escribe un texto para presentarte y pedirle datos relevantes para ayudarle como su nombre, sexo, capacidad de caminar, edad y fecha de nacimiento.',
     'en-US':
         'You are VITA, an assistant for elderly people, your goal is to keep them entertained, start conversations with them, propose to play games on the phone screen, watch videos, listen to music, remind them to take their medication, you will also have some data about their heartbeat so you could propose to take them for a walk if they can walk. do not use emoticons. write in a way that the text can be processed in a spoken form.\n\nif the user has just opened the application for the first time, write a text to introduce yourself and ask relevant data to help them such as their name, gender, walking ability, age and birthdate.'
   };
@@ -169,29 +169,65 @@ class LangStrings {
     'es-ES': 'Volumen reducido',
     'en-US': 'Volume reduced',
   };
-
-  static const ThereIsWhatIHaveFound = {
+  static const thereIsWhatIHaveFound = {
     'es-ES': 'Lo que he encontrado es ',
     'en-US': 'There is what I have found '
   };
-
   static const callSuccess = {
     'es-ES': 'Llamada realizada con éxito',
     'en-US': 'Call successfully made',
   };
-  
   static const callFailed = {
     'es-ES': 'No se pudo realizar la llamada',
     'en-US': 'Call failed',
   };
-
   static const emailSuccess = {
     'es-ES': 'Correo electrónico enviado con éxito',
     'en-US': 'Email successfully sent',
   };
-
   static const emailFailed = {
     'es-ES': 'No se pudo enviar el correo electrónico',
     'en-US': 'Email failed to send',
+  };
+  static const thisIsMemory = {
+    'es-ES':
+        'Esto es en resumen la información que tienes del usuario, tenla en cuenta para contestar:',
+    'en-US':
+        'This is a summary of the information you have about the user, take it into account when answering:'
+  };
+  static const settings = {'es-ES': 'Ajustes', 'en-US': 'Settings'};
+  static const memory = {'es-ES': 'Memoria', 'en-US': 'Memory'};
+  static const typeAnithing = {
+    'es-ES': 'Escribe Algo',
+    'en-US': 'Type Anithing'
+  };
+  static const preguntar = {'es-ES': 'Preguntar', 'en-US': 'Ask'};
+  static const testingVoice = {
+    'es-ES':
+        'Probando la voz, puedes seleccionar otra diferente, la ultima que selecciones será la voz por defecto',
+    'en-US':
+        'Testing voice, you can select another one, the last one selected will be the default voice'
+  };
+  static const voiceSelector = {
+    'es-ES': 'Selecciona una voz',
+    'en-US': 'Select a voice'
+  };
+  static const speechSpeed = {
+    'es-ES': 'Velocidad de voz',
+    'en-US': 'Voice speed'
+  };
+
+  static const memoryFunctions = {
+    'es-ES': 'Funciones de memoria',
+    'en-US': 'Memory functions'
+  };
+
+  static const rememberList = {
+    'es-ES': 'Lista de recordatorios',
+    'en-US': 'Remember list'
+  };
+  static const shopList = {
+    'es-ES': 'Lista de compras',
+    'en-US': 'To-do list'
   };
 }

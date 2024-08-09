@@ -6,6 +6,8 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:vita_seniors/components/Lang.dart';
 import 'package:vita_seniors/components/WebView.dart';
+import 'package:vita_seniors/screens/Settings.dart';
+import 'package:vita_seniors/screens/RememberInterface.dart';
 
 class VoiceInterfacePage extends StatefulWidget {
   const VoiceInterfacePage({super.key});
@@ -28,6 +30,7 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
   bool userFisrtInteraction = false;
   bool sendToIA = true;
   bool playVideo = false;
+  String vitaImage = 'assets/images/closing_eyes.gif';
   String url = '';
 
   @override
@@ -57,6 +60,46 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
           style:
               const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         )),
+        actions: [
+          PopupMenuButton(
+              icon: const Icon(Icons.more_vert),
+              itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: LangStrings.settings[lang] ?? '',
+                      onTap: () {
+                        //abrimos settingPage()
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const SettingsPage()));
+                      },
+                      child: Row(
+                        children: [
+                          const Icon(Icons.settings),
+                          const SizedBox(width: 8),
+                          Text(LangStrings.settings[lang] ?? ''),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: LangStrings.memory[lang] ?? '',
+                      onTap: () {
+                        //abrimos settingPage()
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const RememberPage()));
+                      },
+                      child: Row(
+                        children: [
+                          const Icon(Icons.memory),
+                          const SizedBox(width: 8),
+                          Text(LangStrings.memory[lang] ?? ''),
+                        ],
+                      ),
+                    ),
+                  ]),
+        ],
       ),
       body: SingleChildScrollView(
           child: Container(
@@ -65,22 +108,47 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(children: [
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      labelText: 'Ingrese su nombre',
+                  Center(
+                    child: CircleAvatar(
+                      radius: 50, // Ajusta el radio según el tamaño deseado
+                      backgroundImage: AssetImage(vitaImage),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, ingrese su nombre';
-                      }
-                      return null;
-                    },
-                    onChanged: (value) {
-                      _lastWords = value;
-                    },
                   ),
-                  Text(url),
-                  ElevatedButton(onPressed: fake, child: Text('Test')),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.56,
+                        child: TextFormField(
+                          decoration: InputDecoration(
+                            labelText: LangStrings.typeAnithing[lang] ?? '',
+                            labelStyle: const TextStyle(color: Colors.white),
+                            enabledBorder: const UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                            ),
+                            focusedBorder: const UnderlineInputBorder(
+                              borderSide: BorderSide(color: Colors.white),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Por favor, ingrese su nombre';
+                            }
+                            return null;
+                          },
+                          style: const TextStyle(color: Colors.white),
+                          onChanged: (value) {
+                            _lastWords = value;
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.3,
+                        child: ElevatedButton(
+                            onPressed: fake,
+                            child: Text(LangStrings.preguntar[lang] ?? '')),
+                      )
+                    ],
+                  ),
                   Center(
                       child: Text(
                     _speechToText.isListening
@@ -96,7 +164,7 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
                     ),
                   )),
                   playVideo
-                      ? Container(
+                      ? SizedBox(
                           height: MediaQuery.of(context).size.height * 0.5,
                           child: Column(
                             children: [
@@ -148,7 +216,8 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
 
   void _initSpeech() async {
     _speechEnabled = await _speechToText.initialize();
-    setState(() {});
+    //aqui comprobaremos si el usuario ha interaccionado ya, en caso de no haberlo hecho nos presentaremos
+    //_startListening();
   }
 
   void _startListening() async {
@@ -156,32 +225,41 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
     setState(() {
       listen = true;
       textToShow = '';
+      vitaImage = 'assets/images/escribiendo.gif';
     });
+  }
+
+  Future<Map<String, dynamic>> analizerFunction(String words) async {
+    setState(() {
+      vitaImage = 'assets/images/searching.gif';
+    });
+    Map<String, dynamic> response = await deciderFunctions.analizer(words);
+
+    return response;
   }
 
   void _stopListening() async {
     await _speechToText.stop();
 
     if (_lastWords != '') {
-      Map<String, dynamic> response =
-          await deciderFunctions.analizer(_lastWords);
+      Map<String, dynamic> response = await analizerFunction(_lastWords);
       if (response["run"] == "gemini") {
         textToShow = response["response"];
         speakFunctions.speakText(response["response"]);
       }
       if (response["run"] == "youtube") {
         setState(() {
-          textToShow = LangStrings.ThereIsWhatIHaveFound[lang] ?? '';
+          textToShow = LangStrings.thereIsWhatIHaveFound[lang] ?? '';
           url = 'https://www.youtube.com/embed/${response["response"]}';
-          print(url);
           playVideo = true;
+          vitaImage = 'assets/images/closing_eyes.gif';
         });
       }
       if (response['run'] == 'music') {
         setState(() {
-          textToShow = LangStrings.ThereIsWhatIHaveFound[lang] ?? '';
+          textToShow = LangStrings.thereIsWhatIHaveFound[lang] ?? '';
           url = 'https://music.youtube.com/watch?v=${response["response"]}';
-          print(url);
+          vitaImage = 'assets/images/closing_eyes.gif';
           playVideo = true;
         });
       }
@@ -190,6 +268,7 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
       _lastWords = '';
       listen = false;
       textToShow = textToShow;
+      vitaImage = 'assets/images/closing_eyes.gif';
     });
   }
 
@@ -241,14 +320,14 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
       }
       if (response["run"] == "youtube") {
         setState(() {
-          textToShow = LangStrings.ThereIsWhatIHaveFound[lang] ?? '';
+          textToShow = LangStrings.thereIsWhatIHaveFound[lang] ?? '';
           url = 'https://www.youtube.com/watch?v=${response["response"]}';
           playVideo = true;
         });
       }
       if (response['run'] == 'music') {
         setState(() {
-          textToShow = LangStrings.ThereIsWhatIHaveFound[lang] ?? '';
+          textToShow = LangStrings.thereIsWhatIHaveFound[lang] ?? '';
           url = 'https://music.youtube.com/watch?v=${response["response"]}';
           playVideo = true;
         });

@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vita_seniors/screens/SplashScreen.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() {
-  initBackground();
   runApp(const MyApp());
-}
-
-void initBackground() async {
-  await dotenv.load(fileName: ".env");
 }
 
 class MyApp extends StatelessWidget {

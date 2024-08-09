@@ -44,3 +44,5 @@ app.*.map.json
 env.txt
 .env
 android/vita_key
+
+lib/components/Key.dart
