@@ -7,6 +7,7 @@ class Navigator {
 
   Future<String> searchOnGoogle(String search) async {
     final response = await http.get(Uri.parse(googleSearchUrl + search));
+
     return response.body;
   }
 
@@ -17,7 +18,7 @@ class Navigator {
     var request = http.Request(
         'GET',
         Uri.parse(
-            'https://www.googleapis.com/youtube/v3/search?q=$search&maxResults=1&key=${KeyStorageCustom.YOUTUBE_API_KEY}'));
+            'https://www.googleapis.com/youtube/v3/search?q=$search&maxResults=10&key=${KeyStorageCustom.YOUTUBE_API_KEY}'));
 
     http.StreamedResponse response = await request.send();
 
@@ -26,7 +27,9 @@ class Navigator {
       Map<String, dynamic> data = json.decode(rawData);
       List<String> results = [];
       for (var item in data['items']) {
-        results.add(item['id']['videoId']);
+        if (item['id']['kind'] != 'youtube#playlist') {
+          results.add(item['id']['videoId']);
+        }
       }
       return results[0];
     } else {

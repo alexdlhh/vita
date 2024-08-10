@@ -40,32 +40,46 @@ class Rememberfuntions {
   Future<void> setToRememberList(Map<String, dynamic> data) async {
     //primero leemos la lista de recordatorios
     String rememberList = await memory.readFile('rememberList');
-    if (rememberList == '') {
+
+    if (rememberList == '' || rememberList == '{}') {
       rememberList = '{"rememberList":[]}';
+    } else {
+      rememberList = rememberList.substring(
+          rememberList.indexOf('{'), rememberList.lastIndexOf('}') + 1);
     }
     Map<String, dynamic> rememberListDefined = json.decode(rememberList);
-    rememberListDefined =
-        await cleanRememberListOldRemembers(rememberListDefined);
     //por seguridad comprobamos si los campos date, hour, description existen en data
     if (data.containsKey('date')) {
       String today = DateTime.now().toString().split(' ')[0];
       if (data['date'] == 'hoy' || data['date'] == 'today') {
         data['date'] = today;
       }
+    } else {
+      String today = DateTime.now().toString().split(' ')[0];
+      data['date'] = today;
     }
     if (data.containsKey('hour')) {
       if (data['hour'] == 'now') {
         data['hour'] = DateTime.now().toString().split(' ')[1];
       }
+    } else {
+      data['hour'] = DateTime.now().toString().split(' ')[1];
     }
     if (data.containsKey('description')) {
       if (data['description'] == 'none') {
         data['description'] = '';
       }
+    } else {
+      data['description'] = jsonEncode(data);
     }
-    createEvent(data);
+    //createEvent(data); quitamos el guardado en google maps debido a que hay que programar logica de inicio sesion google
     //añadimos el recordatorio a la lista
-    rememberListDefined['rememberList'].add(data);
+    if (rememberListDefined['rememberList'].isNotEmpty) {
+      rememberListDefined['rememberList'].add(data);
+    } else {
+      // Handle empty list case, e.g., create a new list
+      rememberListDefined['rememberList'] = [data];
+    }
     //convertimos rememberListDefined a JSON para su guardado
     String rememberListJSON = json.encode(rememberListDefined);
     //guardamos el JSON en el archivo rememberList
@@ -74,20 +88,27 @@ class Rememberfuntions {
 
   Future<String> getRememberList() async {
     String rememberList = await memory.readFile('rememberList');
+    rememberList = rememberList.substring(
+        rememberList.indexOf('{'), rememberList.lastIndexOf('}') + 1);
     return rememberList;
   }
 
   Future<Map<String, dynamic>> cleanRememberListOldRemembers(
       Map<String, dynamic> rememberList) async {
     DateTime today = DateTime.now();
-    for (int i = 0; i < rememberList['rememberList'].length; i++) {
-      DateTime date = DateTime.parse(rememberList['rememberList'][i]['date']);
-      if (date.isBefore(today)) {
-        rememberList['rememberList'].removeAt(i);
+    String rememberListJSON = '';
+    if (rememberList['rememberList'] != null) {
+      for (int i = 0; i < rememberList['rememberList'].length; i++) {
+        DateTime date = DateTime.parse(rememberList['rememberList'][i]['date']);
+        if (date.isBefore(today)) {
+          rememberList['rememberList'].removeAt(i);
+        }
       }
+      String rememberListJSON = json.encode(rememberList);
+    } else {
+      String rememberListJSON = '{"rememberList":[]}';
     }
 
-    String rememberListJSON = json.encode(rememberList);
     await memory.modifyFile('rememberList', rememberListJSON);
 
     return rememberList;
@@ -96,10 +117,21 @@ class Rememberfuntions {
   Future<void> setToShopList(Map<String, dynamic> data) async {
     //primero leemos la lista de compras
     String shopList = await memory.readFile('shopList');
-    Map<String, dynamic> shopListDefined = json.decode(shopList);
+    if (shopList == '' || shopList == '{}') {
+      shopList = '{"shopList":[]}';
+    } else {
+      shopList = shopList.substring(
+          shopList.indexOf('{'), shopList.lastIndexOf('}') + 1);
+    }
+    Map<String, dynamic> shopListDefined = jsonDecode(shopList);
     //por seguridad comprobamos si los campos item y quantity existen
     if (data.containsKey('item') && data.containsKey('quantity')) {
-      shopListDefined['shopList'].add(data);
+      if (shopListDefined['shopList'].isNotEmpty) {
+        shopListDefined['shopList'].add(data);
+      } else {
+        // Handle empty list case, e.g., create a new list
+        shopListDefined['shopList'] = [data];
+      }
     }
     //convertimos shopListDefined a JSON para su guardado
     String shopListJSON = json.encode(shopListDefined);
@@ -109,6 +141,8 @@ class Rememberfuntions {
 
   Future<String> getShopList() async {
     String shopList = await memory.readFile('shopList');
+    shopList = shopList.substring(
+        shopList.indexOf('{'), shopList.lastIndexOf('}') + 1);
     return shopList;
   }
 
@@ -118,6 +152,8 @@ class Rememberfuntions {
 
   Future<void> setMemoryForIA(String user, String assistant) async {
     String memoryTxt = await memory.readFile('memory');
+    memoryTxt = memoryTxt.substring(
+        memoryTxt.indexOf('{'), memoryTxt.lastIndexOf('}') + 1);
     Map<String, dynamic> memoryDefined = json.decode(memoryTxt);
     memoryDefined['user'] = user;
     memoryDefined['assistant'] = assistant;
@@ -128,6 +164,8 @@ class Rememberfuntions {
 
   Future<String> getMemoryForIA() async {
     String memoryTxt = await memory.readFile('memory');
+    memoryTxt = memoryTxt.substring(
+        memoryTxt.indexOf('{'), memoryTxt.lastIndexOf('}') + 1);
     return memoryTxt;
   }
 
@@ -161,11 +199,7 @@ class Rememberfuntions {
   Future<bool> checkUserFirstInteraction() async {
     final prefs = await SharedPreferences.getInstance();
     bool userFirstInteraction = prefs.getBool('userFirstInteraction') ?? false;
-    if (!userFirstInteraction) {
-      await prefs.setBool('userFirstInteraction', true);
-      return true;
-    }
-    return false;
+    return userFirstInteraction;
   }
 
   Future<void> setFirstInteraction() async {

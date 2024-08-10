@@ -17,7 +17,8 @@ class DeciderFunctions {
   final navigator = Navigator();
   MakeContact makeContact = MakeContact();
 
-  Future<Map<String, dynamic>> analizer(String userAsk) async {
+  Future<Map<String, dynamic>> analizer(
+      String userAsk, String lastSpeech) async {
     String today = DateTime.now().toString().split(' ')[0];
     String instructions = deciderPrompt(lang, today);
     String run = "gemini";
@@ -41,12 +42,15 @@ class DeciderFunctions {
         switch (key) {
           case 'remember':
           case '#remember':
+            print('REMEMBER');
             rememberfuntions.setToRememberList(data);
             response = LangStrings.rememberAdded[lang] ?? '';
             instruction = "${LangStrings.informUserOf[lang] ?? ''} $response";
+            print(instruction);
             break;
           case 'readremember':
           case '#readremember':
+            print('readremember');
             response = await rememberfuntions.getRememberList();
             instruction =
                 "${LangStrings.readRememberList[lang] ?? ''} $response";
@@ -59,6 +63,7 @@ class DeciderFunctions {
             break;
           case 'readtoshop':
           case '#readtoshop':
+            print('readtoshop');
             response = await rememberfuntions.getShopList();
             instruction = "${LangStrings.readToShopList[lang] ?? ''} $response";
             break;
@@ -70,11 +75,13 @@ class DeciderFunctions {
             break;
           case 'volumeup':
           case '#volumeup':
+            print('VOLUMEN UP');
             volumeUp();
             instruction = LangStrings.volumeUp[lang] ?? '';
             break;
           case 'volumedown':
           case '#volumedown':
+            print('VOLUMEN DOWN');
             volumeDowb();
             instruction = LangStrings.volumeDown[lang] ?? '';
             break;
@@ -102,13 +109,17 @@ class DeciderFunctions {
             break;
           case 'call':
           case '#call':
+            print('call');
             String name = data['name'] ?? '';
-            List<String> phoneNumbers = await makeContact.searchContact(name);
+            List<String> phoneNumbers =
+                await makeContact.searchContact(name, data: 'phone');
             //si phoneNumbers es mayor que 1 preguntamos a quien llamar, si no solo llamamos al numero
+            print(phoneNumbers);
             if (phoneNumbers.length > 1) {
               String contactSelect =
                   contactSelectPrompt(lang, phoneNumbers, userAsk);
-              response = await gemini.userPromptDefault(contactSelect, lang);
+              response = await gemini.userPromptDefault(
+                  contactSelect, lang, lastSpeech);
               //usamos expresiones regulares para obtener solo el numero
               RegExp expresionNumeros = RegExp(r'\d+');
               String numero =
@@ -133,7 +144,8 @@ class DeciderFunctions {
             //si emails es mayor que 1 preguntamos a quien enviar el mensaje, si no solo enviamos
             if (emails.length > 1) {
               String contactSelect = emailSelectPrompt(lang, emails, userAsk);
-              response = await gemini.userPromptDefault(contactSelect, lang);
+              response = await gemini.userPromptDefault(
+                  contactSelect, lang, lastSpeech);
               //usamos expresiones regulares para obtener solo el email
               RegExp expresionEmail = RegExp(r'\w+@\w+\.\w+');
               String email =
@@ -152,6 +164,7 @@ class DeciderFunctions {
             break;
           case 'whatsapp':
           case '#whatsapp':
+            print('WHATSAPPP');
             String name = data['name'] ?? '';
             String message = data['message'] ?? '';
             List<String> phoneNumbers = await makeContact.searchContact(name);
@@ -159,7 +172,8 @@ class DeciderFunctions {
             if (phoneNumbers.length > 1) {
               String contactSelect =
                   contactSelectPrompt(lang, phoneNumbers, userAsk);
-              response = await gemini.userPromptDefault(contactSelect, lang);
+              response = await gemini.userPromptDefault(
+                  contactSelect, lang, lastSpeech);
               //usamos expresiones regulares para obtener solo el numero
               RegExp expresionNumeros = RegExp(r'\d+');
               String numero =
@@ -180,11 +194,16 @@ class DeciderFunctions {
             instruction = prompt;
         }
         if (instruction != '') {
-          response = await gemini.userPromptDefault(instruction, lang);
+          response =
+              await gemini.userPromptDefault(instruction, lang, lastSpeech);
         }
       } else {
-        response = await gemini.userPromptDefault(prompt, lang);
+        response = await gemini.userPromptDefault(prompt, lang, lastSpeech);
       }
+    }
+
+    if (response == '') {
+      response = await gemini.userPromptDefault(prompt, lang, lastSpeech);
     }
 
     Map<String, dynamic> data = {"response": response, "run": run};

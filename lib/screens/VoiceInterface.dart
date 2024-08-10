@@ -9,6 +9,7 @@ import 'package:vita_seniors/components/Lang.dart';
 import 'package:vita_seniors/components/WebView.dart';
 import 'package:vita_seniors/screens/Settings.dart';
 import 'package:vita_seniors/screens/RememberInterface.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class VoiceInterfacePage extends StatefulWidget {
   const VoiceInterfacePage({super.key});
@@ -44,10 +45,19 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
 
   void init() async {
     String ln = await rememberFuntions.getLanguage();
+    await requestPermission();
     if (ln != lang) {
       setState(() {
         lang = ln;
       });
+    }
+  }
+
+  Future<void> requestPermission() async {
+    final permission = Permission.contacts;
+
+    if (await permission.isDenied) {
+      await permission.request();
     }
   }
 
@@ -105,7 +115,7 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
       ),
       body: SingleChildScrollView(
           child: Container(
-              height: MediaQuery.of(context).size.height,
+              height: MediaQuery.of(context).size.height*1.4,
               color: const Color.fromRGBO(85, 83, 202, 1),
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -117,19 +127,17 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
                     ),
                   ),
                   Center(
-                      child: Text(
-                    _speechToText.isListening
-                        ? _lastWords
-                        : _speechEnabled
-                            ? (listen
-                                ? LangStrings.iCanHearYou[lang] ?? ''
-                                : LangStrings.tapToTalk[lang] ?? '')
-                            : LangStrings.iCantHearYou[lang] ?? '',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color.fromARGB(255, 208, 207, 207),
-                    ),
-                  )),
+                    child: _speechToText.isNotListening?
+                        Text(LangStrings.iCanHearYou[lang]??'',style: TextStyle(color: Colors.white),):
+                        Text(LangStrings.tapToTalk[lang]??'',style: TextStyle(color: Colors.white),)
+                  ),
+                  Center(
+                      child: Text(_lastWords ?? '',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color.fromARGB(255, 208, 207, 207),
+                        ),
+                      )),
                   playVideo
                       ? SizedBox(
                           height: MediaQuery.of(context).size.height * 0.5,
@@ -151,6 +159,7 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
                                   )
                                 ],
                               ),
+                              Text(url),
                               WebViewBox(
                                 url: url,
                                 width: MediaQuery.of(context).size.width,
@@ -183,15 +192,6 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
 
   void _initSpeech() async {
     _speechEnabled = await _speechToText.initialize();
-    //aqui comprobaremos si el usuario ha interaccionado ya, en caso de no haberlo hecho nos presentaremos
-    if (await rememberFuntions.checkUserFirstInteraction()) {
-      await rememberFuntions.setFirstInteraction();
-      textToShow = await geminifuntions.userFirstInteraction(lang);
-      await speakFunctions.speakText(textToShow);
-      setState(() {
-        userFisrtInteraction = true;
-      });
-    }
     _startListening();
   }
 
@@ -208,8 +208,8 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
     setState(() {
       vitaImage = 'assets/images/searching.gif';
     });
-    Map<String, dynamic> response = await deciderFunctions.analizer(words);
-
+    Map<String, dynamic> response = await deciderFunctions.analizer(words,textToShow);
+    print(response);
     return response;
   }
 
@@ -220,7 +220,13 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
       Map<String, dynamic> response = await analizerFunction(_lastWords);
       if (response["run"] == "gemini") {
         textToShow = response["response"];
-        speakFunctions.speakText(response["response"]);
+        listen = false;
+        setState(() {
+          _lastWords = '';
+          listen = false;
+          textToShow = textToShow;
+          vitaImage = 'assets/images/closing_eyes.gif';
+        });
       }
       if (response["run"] == "youtube") {
         setState(() {
@@ -228,6 +234,7 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
           url = 'https://www.youtube.com/embed/${response["response"]}';
           playVideo = true;
           vitaImage = 'assets/images/closing_eyes.gif';
+          listen = false;
         });
       }
       if (response['run'] == 'music') {
@@ -236,32 +243,34 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
           url = 'https://music.youtube.com/watch?v=${response["response"]}';
           vitaImage = 'assets/images/closing_eyes.gif';
           playVideo = true;
+          listen = false;
         });
       }
+      speakFunctions.speakText(textToShow);
     }
-    setState(() {
-      _lastWords = '';
-      listen = false;
-      textToShow = textToShow;
-      vitaImage = 'assets/images/closing_eyes.gif';
-    });
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
-    Future.delayed(const Duration(seconds: 3), () {
-      if (_lastWords == result.recognizedWords) {
-        _stopListening();
-      }
-      _detectUserStopSeggestion();
-    });
     setState(() {
       _lastWords = result.recognizedWords;
     });
+    if (result.finalResult) {
+      Future.delayed(const Duration(seconds: 3), () {
+        if (result.finalResult) {
+          print('LLAMAMOS A GEMINI DESDE FUTURE DELAYED');
+          _stopListening();
+        }
+      });
+    }
   }
 
   void _detectUserStopSeggestion() {
-    //buscamos en lo que oye el microfono y lo comparamos con lo que mandamos al tts, si la diferencia es, vita,para,si pero, etc.. entonces paramos el spech
-    List<String> stopWords = [
+    // Dividir el texto a mostrar y las últimas palabras en listas
+    List<String> wordsToShow = textToShow.split(' ');
+    List<String> listenedWords = _lastWords.split(' ');
+
+    // Crear un conjunto para una búsqueda más rápida
+    Set<String> stopWordsSet = {
       'Vita',
       'para',
       'stop',
@@ -279,14 +288,18 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
       'espera',
       'second',
       'momento'
-    ];
-    //a partir de textToShow separamos todo por un espacio y comparamos parabra a palabra con _lastWords si alguna es diferente y ademas aparece en stopstring
-    List<String> waitedWords = textToShow.split(' ');
-    List<String> lisenWords = _lastWords.split(' ');
-    for (int i = 0; i < waitedWords.length; i++) {
-      if (waitedWords[i] != lisenWords[i] && stopWords.contains(_lastWords)) {
-        speakFunctions.stopSpeaking();
-        _startListening();
+    }; // Agregar el resto de las palabras
+
+    // Comparar las últimas palabras con las palabras de parada
+    // Priorizar palabras de parada al final de la frase
+    int stoppedTimes = 0;
+    for (int i = listenedWords.length - 1; i >= 0; i--) {
+      if (stopWordsSet.contains(listenedWords[i].toLowerCase())) {
+        /*speakFunctions.stopSpeaking();
+        _startListening();*/
+        stoppedTimes++;
+        print('veces que hemos querido parar $stoppedTimes');
+        return; // Detener la búsqueda si se encuentra una palabra de parada
       }
     }
   }

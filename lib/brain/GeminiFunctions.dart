@@ -13,31 +13,39 @@ class Geminifuntions {
 
   Future<String> userFirstInteraction(String lang) async {
     String result = '';
+    final rememberfuntions = Rememberfuntions();
     try {
-      final content = [Content.text(LangStrings.hellowPrompt[lang]??'')];
+      final content = [Content.text(LangStrings.hellowPrompt[lang] ?? '')];
       final response = await geminiModel.generateContent(content);
       result = response.text ?? '';
+      await rememberfuntions.setMemoryForIA(result, result);
     } catch (e) {
       //print("Error is $e");
     }
     return result;
   }
 
-  Future<String> userPromptDefault(String userSpeak, String lang) async {
+  Future<String> userPromptDefault(
+      String userSpeak, String lang, String userPromptDefault) async {
     final rememberfuntions = Rememberfuntions();
     String result = '';
+    String lastSpeechCompilation = '';
     try {
       final memories = await rememberfuntions.getMemoryForIA();
+      if (userPromptDefault != null) {
+        String lastSpeechCompilation =
+            '${LangStrings.thisIsTheLast[lang] ?? ''}:$userPromptDefault \n\n';
+      }
       final content = [
         Content.text(
-            '${LangStrings.thisIsMemory[lang] ?? ''}$memories ${LangStrings.userSaid0[lang] ?? ''} $userSpeak ${LangStrings.userSaid2[lang] ?? ''}')
+            '${lastSpeechCompilation} ${LangStrings.thisIsMemory[lang] ?? ''}$memories ${LangStrings.userSaid0[lang] ?? ''} $userSpeak ${LangStrings.userSaid2[lang] ?? ''}')
       ];
       final response = await geminiModel.generateContent(content);
 
       result = response.text ?? 'no texto de gemini';
       await rememberfuntions.setMemoryForIA(userSpeak, result);
     } catch (e) {
-      //print("Error is $e");
+      print("Error is $e");
     }
     return result;
   }

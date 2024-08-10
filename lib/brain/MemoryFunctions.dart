@@ -20,7 +20,13 @@ class MemoryFunctions {
       await file.writeAsString('{}');
     }
 
-    return await file.readAsString();
+    String content = await file.readAsString();
+    if(!content.contains('{') || !content.contains('}')){
+        content = '{}';
+    }
+    content = content.substring(
+        content.indexOf('{'), content.lastIndexOf('}') + 1);
+    return content;
   }
 
   Future<void> modifyFile(String name, String newValue) async {
@@ -29,6 +35,8 @@ class MemoryFunctions {
     final file = File('${memoryDir.path}/$name.json');
 
     // Crea el archivo (si no existe) y escribe el contenido
+    newValue = newValue.substring(
+        newValue.indexOf('{'), newValue.lastIndexOf('}') + 1);
     await file.writeAsString(newValue);
   }
 

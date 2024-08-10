@@ -130,8 +130,14 @@ class LangStrings {
         'with this information you have to make a personalized sentence for the user and propose to talk about some topic, respond in english'
   };
   static const userSaid2 = {
-    'es-ES': 'responde al usuario lo mejor que puedas, responde en español',
-    'en-US': 'respond to the user as best you can, respond in english'
+    'es-ES':
+        'responde al usuario lo mejor que puedas, si te pide una historia cuantale una historia, si te pide que le describas algo describelo, expresate siempre en lenguaje natural evita JSON y emoticonos, responde en español',
+    'en-US':
+        'answer the user the best you can, if he asks you for a story tell him a story, if he asks you to describe something describe it, always express yourself in natural language avoid JSON and emoticons, answer in English.'
+  };
+  static const thisIsTheLast = {
+    'es-ES': 'esto es lo ultimo que dijiste, para que lo tengas en cuenta',
+    'en-US': 'this is the last thing you said, so that you keep it in mind'
   };
   static const rememberAdded = {
     'es-ES': 'Recordatorio añadido',
@@ -226,8 +232,5 @@ class LangStrings {
     'es-ES': 'Lista de recordatorios',
     'en-US': 'Remember list'
   };
-  static const shopList = {
-    'es-ES': 'Lista de compras',
-    'en-US': 'To-do list'
-  };
+  static const shopList = {'es-ES': 'Lista de compras', 'en-US': 'To-do list'};
 }
