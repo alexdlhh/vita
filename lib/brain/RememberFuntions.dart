@@ -104,9 +104,9 @@ class Rememberfuntions {
           rememberList['rememberList'].removeAt(i);
         }
       }
-      String rememberListJSON = json.encode(rememberList);
+      rememberListJSON = json.encode(rememberList);
     } else {
-      String rememberListJSON = '{"rememberList":[]}';
+      rememberListJSON = '{"rememberList":[]}';
     }
 
     await memory.modifyFile('rememberList', rememberListJSON);

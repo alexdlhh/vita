@@ -32,13 +32,13 @@ class Geminifuntions {
     String lastSpeechCompilation = '';
     try {
       final memories = await rememberfuntions.getMemoryForIA();
-      if (userPromptDefault != null) {
-        String lastSpeechCompilation =
+      if (userPromptDefault != '') {
+        lastSpeechCompilation =
             '${LangStrings.thisIsTheLast[lang] ?? ''}:$userPromptDefault \n\n';
       }
       final content = [
         Content.text(
-            '${lastSpeechCompilation} ${LangStrings.thisIsMemory[lang] ?? ''}$memories ${LangStrings.userSaid0[lang] ?? ''} $userSpeak ${LangStrings.userSaid2[lang] ?? ''}')
+            '$lastSpeechCompilation ${LangStrings.thisIsMemory[lang] ?? ''}$memories ${LangStrings.userSaid0[lang] ?? ''} $userSpeak ${LangStrings.userSaid2[lang] ?? ''}')
       ];
       final response = await geminiModel.generateContent(content);
 

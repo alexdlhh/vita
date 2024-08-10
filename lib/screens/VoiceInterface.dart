@@ -115,7 +115,7 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
       ),
       body: SingleChildScrollView(
           child: Container(
-              height: MediaQuery.of(context).size.height*1.4,
+              height: MediaQuery.of(context).size.height * 1.4,
               color: const Color.fromRGBO(85, 83, 202, 1),
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -127,17 +127,22 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
                     ),
                   ),
                   Center(
-                    child: _speechToText.isNotListening?
-                        Text(LangStrings.iCanHearYou[lang]??'',style: TextStyle(color: Colors.white),):
-                        Text(LangStrings.tapToTalk[lang]??'',style: TextStyle(color: Colors.white),)
-                  ),
+                      child: _speechToText.isNotListening
+                          ? Text(
+                              LangStrings.iCanHearYou[lang] ?? '',
+                              style: const TextStyle(color: Colors.white),
+                            )
+                          : Text(
+                              LangStrings.tapToTalk[lang] ?? '',
+                              style: const TextStyle(color: Colors.white),
+                            )),
                   Center(
-                      child: Text(_lastWords ?? '',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Color.fromARGB(255, 208, 207, 207),
-                        ),
-                      )),
+                      child: Text(_lastWords,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color.fromARGB(255, 208, 207, 207),
+                    ),
+                  )),
                   playVideo
                       ? SizedBox(
                           height: MediaQuery.of(context).size.height * 0.5,
@@ -208,8 +213,9 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
     setState(() {
       vitaImage = 'assets/images/searching.gif';
     });
-    Map<String, dynamic> response = await deciderFunctions.analizer(words,textToShow);
-    print(response);
+    Map<String, dynamic> response =
+        await deciderFunctions.analizer(words, textToShow);
+    //print(response);
     return response;
   }
 
@@ -257,7 +263,7 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
     if (result.finalResult) {
       Future.delayed(const Duration(seconds: 3), () {
         if (result.finalResult) {
-          print('LLAMAMOS A GEMINI DESDE FUTURE DELAYED');
+          //print('LLAMAMOS A GEMINI DESDE FUTURE DELAYED');
           _stopListening();
         }
       });
@@ -266,7 +272,6 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
 
   void _detectUserStopSeggestion() {
     // Dividir el texto a mostrar y las últimas palabras en listas
-    List<String> wordsToShow = textToShow.split(' ');
     List<String> listenedWords = _lastWords.split(' ');
 
     // Crear un conjunto para una búsqueda más rápida
@@ -298,7 +303,11 @@ class _VoiceInterfacePageState extends State<VoiceInterfacePage> {
         /*speakFunctions.stopSpeaking();
         _startListening();*/
         stoppedTimes++;
-        print('veces que hemos querido parar $stoppedTimes');
+        if (stoppedTimes == 20) {
+          speakFunctions.stopSpeaking();
+          _startListening();
+        }
+        //print('veces que hemos querido parar $stoppedTimes');
         return; // Detener la búsqueda si se encuentra una palabra de parada
       }
     }
